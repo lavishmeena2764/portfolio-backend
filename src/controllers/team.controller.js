@@ -19,6 +19,8 @@ cloudinary.config({
 });
 
 export async function newTeam(req, res) {
+  console.log(req.body)
+  console.log(req.files)
   const {
     name,
     education,
@@ -27,7 +29,8 @@ export async function newTeam(req, res) {
   } = req.body;
 
   const img = req.files.img;
-  cloudinary.uploader.upload(img.tempFilePath, (err, result) => {
+  try {
+    const result = await cloudinary.uploader.upload(img.tempFilePath);
     const team = new Team({
       name: name,
       img: result.url,
@@ -36,22 +39,21 @@ export async function newTeam(req, res) {
       github: github
     });
     console.log(team);
-    team.save().then((finalResult,err) => {
-      if(err) console.log(err)
-      return res.json({ team: finalResult });
-    }).catch(error => console.log(error))
-  })
-
+    const finalResult = await team.save();
+    return res.json({ team: finalResult });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 
 }
 
 
 export async function getTeam(req, res) {
-  console.log("sending teams");
-  Team.find({})
-    .then((finalResult) => {
-      console.log(finalResult);
-      return response_200(res, 'Fetched all team members!!', finalResult);
-    }).catch(error => { return response_500(res, 'Internal server error', error); });
-
+  try {
+    const finalResult = await Team.find({});
+    return response_200(res, 'Fetched all team members!!', finalResult);
+  } catch (error) {
+    return response_500(res, 'Internal server error', error);
+  }
 }

@@ -3,7 +3,7 @@ import { Router } from 'express';
 
 const router = Router();
 
-router.post('/upload', newTeam);
+// router.post('/upload', newTeam);
 router.get('/', getTeam);
 
 export default router;
